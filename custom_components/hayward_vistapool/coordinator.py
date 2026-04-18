@@ -11,6 +11,18 @@ from .const import DOMAIN, FIREBASE_LOGIN_URL, FIRESTORE_URL, DEFAULT_SCAN_INTER
 
 _LOGGER = logging.getLogger(__name__)
 
+BROWSER_HEADERS = {
+    "accept": "*/*",
+    "content-type": "application/json",
+    "origin": "https://hayward.vistapool.es",
+    "referer": "https://hayward.vistapool.es/",
+    "x-client-version": "Chrome/JsCore/5.5.0/FirebaseCore-web",
+    "x-firebase-locale": "de-DE",
+    "x-browser-channel": "stable",
+    "x-browser-year": "2026",
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+}
+
 
 class VistaPoolCoordinator(DataUpdateCoordinator):
     def __init__(self, hass: HomeAssistant, email: str, password: str, pool_id: str,
@@ -50,7 +62,7 @@ class VistaPoolCoordinator(DataUpdateCoordinator):
             raise UpdateFailed(f"VistaPool update failed: {err}") from err
 
     async def _async_login(self):
-        async with ClientSession() as session:
+        async with ClientSession(headers=BROWSER_HEADERS) as session:
             payload = {"email": self.email, "password": self.password, "returnSecureToken": True}
             async with session.post(FIREBASE_LOGIN_URL, json=payload) as resp:
                 login_data = await resp.json()

@@ -12,7 +12,18 @@ from .const import DOMAIN, FIREBASE_LOGIN_URL, FIRESTORE_URL
 
 _LOGGER = logging.getLogger(__name__)
 
-# Human-friendly scan intervals
+BROWSER_HEADERS = {
+    "accept": "*/*",
+    "content-type": "application/json",
+    "origin": "https://hayward.vistapool.es",
+    "referer": "https://hayward.vistapool.es/",
+    "x-client-version": "Chrome/JsCore/5.5.0/FirebaseCore-web",
+    "x-firebase-locale": "de-DE",
+    "x-browser-channel": "stable",
+    "x-browser-year": "2026",
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+}
+
 SCAN_INTERVALS = {
     "10 minutes": 600,
     "30 minutes": 1800,
@@ -24,9 +35,8 @@ SCAN_INTERVALS = {
 
 
 async def _async_try_login(hass: HomeAssistant, email: str, password: str, pool_id: str) -> bool:
-    """Try to login to VistaPool Firebase and fetch pool data once."""
     try:
-        async with ClientSession() as session:
+        async with ClientSession(headers=BROWSER_HEADERS) as session:
             payload = {"email": email, "password": password, "returnSecureToken": True}
             async with session.post(FIREBASE_LOGIN_URL, json=payload) as resp:
                 data = await resp.json()
@@ -50,20 +60,17 @@ async def _async_try_login(hass: HomeAssistant, email: str, password: str, pool_
 
 
 class VistaPoolConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Hayward VistaPool."""
-
     VERSION = 1
 
     async def async_step_user(self, user_input=None) -> FlowResult:
         errors = {}
 
-        # Build schema using vol.In() for dropdown
         data_schema = vol.Schema(
             {
                 vol.Required("email"): str,
                 vol.Required("password"): str,
                 vol.Required("pool_id"): str,
-                vol.Optional("scan_interval", default=1800): vol.In(SCAN_INTERVALS),
+                vol.Optional("scan_interval", default="30 minutes"): vol.In(SCAN_INTERVALS),
                 vol.Optional("enable_debug", default=False): bool,
             }
         )
@@ -101,8 +108,6 @@ class VistaPoolConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class VistaPoolOptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle VistaPool options (e.g., scan interval, debug logging)."""
-
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         super().__init__()
         self._config_entry = config_entry
@@ -119,7 +124,6 @@ class VistaPoolOptionsFlowHandler(config_entries.OptionsFlow):
                 },
             )
 
-        # Reverse lookup current interval
         current_interval = self._config_entry.options.get(
             "scan_interval", self._config_entry.data.get("scan_interval", 1800)
         )
