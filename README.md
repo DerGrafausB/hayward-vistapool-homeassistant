@@ -14,9 +14,12 @@ License: MIT
 - `sensor.vistapool_ph_current` → pH Current  
 - `sensor.vistapool_ph_low_setpoint` → pH Low Setpoint  
 - `sensor.vistapool_ph_high_setpoint` → pH High Setpoint  
-- `sensor.vistapool_orp` → Oxidation Reduction Potential (mV)  
+- `sensor.vistapool_orp` → Oxidation Reduction Potential, measured/current (mV)  
+- `sensor.vistapool_orp_setpoint` → ORP Setpoint (mV)  
 - `sensor.vistapool_chlorine_status` → Chlorine Status (%)  
-- `sensor.vistapool_salt_level` → Salt Level  
+- `sensor.vistapool_salt_level` → Salt Level (%)  
+- `sensor.vistapool_ph_tank_level` → pH Tank Level (%)  
+- `sensor.vistapool_chlorine_tank_level` → Chlorine Tank Level (%)  
 
 ### ⏱️ Equipment Runtime
 - `sensor.vistapool_salt_cell_runtime_partial` → Salt Cell Runtime (Partial, h)  
@@ -38,11 +41,14 @@ License: MIT
 ### 💡 Other Binary Sensors
 - `binary_sensor.vistapool_light_status` → Pool Light Status (On/Off)  
 - `binary_sensor.vistapool_uv_status` → UV Lamp Active  
+- `binary_sensor.vistapool_ph_pump_active` → pH Pump Active  
+- `binary_sensor.vistapool_chlorine_pump_active` → Chlorine Pump Active  
 
 ### 📶 Connectivity
 - `sensor.vistapool_controller_firmware_version` → Controller Firmware Version  
 - `sensor.vistapool_wifi_firmware_version` → WiFi Firmware Version  
 - `sensor.vistapool_wifi_signal_strength` → WiFi Signal Strength (dBm)  
+- `sensor.vistapool_wifi_serial` → WiFi Module Serial  
 
 ### ℹ️ Enriched Device Info
 - Manufacturer: **Hayward**  

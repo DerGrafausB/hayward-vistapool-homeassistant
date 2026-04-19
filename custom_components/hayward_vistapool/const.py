@@ -22,13 +22,29 @@ SENSOR_DEFINITIONS = {
         "scale": 0.01,
     },
     "orp": {
-        "path": "modules.rx.status.value",
+        "path": "modules.rx.current",
         "name": "ORP",
+        "unit": "mV",
+    },
+    "orp_setpoint": {
+        "path": "modules.rx.status.value",
+        "name": "ORP Setpoint",
         "unit": "mV",
     },
     "salt_level": {
         "path": "hidro.level",
         "name": "Salt Level",
+        "unit": "%",
+    },
+    "ph_tank_level": {
+        "path": "modules.ph.tank",
+        "name": "pH Tank Level",
+        "unit": "%",
+    },
+    "chlorine_tank_level": {
+        "path": "modules.cl.tank",
+        "name": "Chlorine Tank Level",
+        "unit": "%",
     },
     "salt_cell_total_runtime": {
         "path": "hidro.cellTotalTime",
@@ -84,6 +100,10 @@ TEXT_SENSOR_DEFINITIONS = {
         "path": "modules.cl.status.value",
         "name": "Chlorine Status",
     },
+    "wifi_serial": {
+        "path": "wifi",
+        "name": "WiFi Serial",
+    },
     "ph_type": {
         "path": "modules.ph.type",
         "name": "pH Type",
@@ -115,6 +135,14 @@ BINARY_SENSOR_DEFINITIONS = {
     "uv_lamp_status": {
         "path": "modules.uv.status",
         "name": "UV Lamp Status",
+    },
+    "ph_pump_active": {
+        "path": "modules.ph.pump_low_on",
+        "name": "pH Pump Active",
+    },
+    "chlorine_pump_active": {
+        "path": "modules.cl.pump_status",
+        "name": "Chlorine Pump Active",
     },
     "backwash_active": {
         "path": "backwash.status",
