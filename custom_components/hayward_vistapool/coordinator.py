@@ -4,6 +4,7 @@ import logging
 from datetime import timedelta
 
 from aiohttp import ClientSession
+from urllib.parse import urlencode
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.core import HomeAssistant
 
@@ -70,6 +71,40 @@ class VistaPoolCoordinator(DataUpdateCoordinator):
                     raise UpdateFailed(f"VistaPool login failed {resp.status} → {login_data}")
                 self._id_token = login_data["idToken"]
                 _LOGGER.info("VistaPool[%s]: login successful", self.pool_id)
+
+    async def async_write_field(self, field_path: str, value, field_type: str = "integer"):
+        if not self._id_token:
+            await self._async_login()
+
+        query = urlencode({"updateMask.fieldPaths": field_path})
+        url = FIRESTORE_URL.format(pool_id=self.pool_id) + f"?{query}"
+
+        leaf_key = "integerValue" if field_type == "integer" else "stringValue"
+        encoded_value = str(int(value)) if field_type == "integer" else str(value)
+        parts = field_path.split('.')
+        nested = {leaf_key: encoded_value}
+        for part in reversed(parts):
+            nested = {"mapValue": {"fields": {part: nested}}}
+        payload = {"fields": nested["mapValue"]["fields"]}
+
+        try:
+            async with ClientSession() as session:
+                headers = {
+                    "Authorization": f"Bearer {self._id_token}",
+                    "Content-Type": "application/json",
+                }
+                async with session.patch(url, headers=headers, json=payload) as resp:
+                    data = await resp.json()
+                    if resp.status == 401:
+                        self._id_token = None
+                        await self._async_login()
+                        return await self.async_write_field(field_path, value, field_type)
+                    if resp.status != 200:
+                        raise UpdateFailed(f"VistaPool write failed {resp.status} → {data}")
+            await self.async_request_refresh()
+        except Exception as err:
+            _LOGGER.exception("VistaPool[%s]: write failed for %s=%s (%s)", self.pool_id, field_path, value, err)
+            raise UpdateFailed(f"VistaPool write failed: {err}") from err
 
     def _parse_data(self, data: dict) -> dict:
         fields = data.get("fields")

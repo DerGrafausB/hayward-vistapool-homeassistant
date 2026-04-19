@@ -20,6 +20,9 @@ License: MIT
 - `sensor.vistapool_salt_level` → Salt Level (%)  
 - `sensor.vistapool_ph_tank_level` → pH Tank Level (%)  
 - `sensor.vistapool_chlorine_tank_level` → Chlorine Tank Level (%)  
+- `number.vistapool_orp_setpoint` → ORP Setpoint writable (mV)  
+- `number.vistapool_ph_low_setpoint` → pH Low Setpoint writable  
+- `number.vistapool_ph_high_setpoint` → pH High Setpoint writable  
 
 ### ⏱️ Equipment Runtime
 - `sensor.vistapool_salt_cell_runtime_partial` → Salt Cell Runtime (Partial, h)  
@@ -90,7 +93,7 @@ Dropdown options include: `10m`, `30m`, `1h`, `6h`, `12h`, `24h`.
 
 - This integration is **unofficial** and not affiliated with Hayward.  
 - It uses the Firebase + Firestore backend exposed by VistaPool / PoolWatch modules.  
-- Currently **read-only**. Control functions may be added in the future.  
+- Supports writable setpoints for ORP, pH low, and pH high via Home Assistant number entities.  
 
 ---
 
