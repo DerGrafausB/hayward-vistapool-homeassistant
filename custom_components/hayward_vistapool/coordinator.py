@@ -42,6 +42,13 @@ class VistaPoolCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self):
         try:
+            return await self._async_fetch_data_with_retry()
+        except Exception as err:
+            _LOGGER.exception("VistaPool[%s]: update failed (%s)", self.pool_id, err)
+            raise UpdateFailed(f"VistaPool update failed: {err}") from err
+
+    async def _async_fetch_data_with_retry(self):
+        for attempt in (1, 2):
             if not self._id_token:
                 await self._async_login()
 
@@ -51,6 +58,15 @@ class VistaPoolCoordinator(DataUpdateCoordinator):
             async with ClientSession() as session:
                 async with session.get(url, headers=headers) as resp:
                     data = await resp.json()
+
+                    if resp.status == 401 and attempt == 1:
+                        _LOGGER.warning(
+                            "VistaPool[%s]: token expired or unauthorized during fetch, retrying login",
+                            self.pool_id,
+                        )
+                        self._id_token = None
+                        continue
+
                     if resp.status != 200 or "fields" not in data:
                         raise UpdateFailed(f"VistaPool[{self.pool_id}]: bad response {resp.status} → {data}")
 
@@ -58,9 +74,8 @@ class VistaPoolCoordinator(DataUpdateCoordinator):
                     if self.enable_debug:
                         _LOGGER.debug("VistaPool[%s]: Parsed data %s", self.pool_id, parsed)
                     return parsed
-        except Exception as err:
-            _LOGGER.exception("VistaPool[%s]: update failed (%s)", self.pool_id, err)
-            raise UpdateFailed(f"VistaPool update failed: {err}") from err
+
+        raise UpdateFailed(f"VistaPool[{self.pool_id}]: fetch retry exhausted")
 
     async def _async_login(self):
         async with ClientSession(headers=BROWSER_HEADERS) as session:
